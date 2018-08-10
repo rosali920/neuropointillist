@@ -3,6 +3,7 @@
 import nibabel as nb
 from glob import glob
 import sys, os
+import numpy as np
 
 def nb_createmask(mask_path):
     #mask_path is a directory containing the binary mask files
@@ -13,10 +14,13 @@ def nb_createmask(mask_path):
     masks = [nb.load(mask) for mask in mask_files]
 
     #concat across mask files and get minimum across masks
-    #this results in a mask containing only the voxels present in all masks
     sum_data = nb.concat_images(masks).get_data().min(axis=3)
-    sum_mask = nb.Nifti1Image(sum_data, masks[0].affine)
-    sum_mask.to_filename(os.path.join('group_min_mask.nii.gz'))
+    #make brain sized array of all 0s
+    new_mask = np.zeros_like(sum_data)
+    #pull just a slice of brain from brain into 0s
+    new_mask[:, 30, :] = sum_data[:, 30, :]
+    sum_mask = nb.Nifti1Image(new_mask, masks[0].affine)
+    sum_mask.to_filename('./test_mask.nii.gz')
 
 if __name__ == "__main__":
    nb_createmask(sys.argv[1])
