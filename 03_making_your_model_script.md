@@ -1,8 +1,8 @@
 ## Making your model script
 
-Adapted from http://ibic.github.io/neuropointillist/ and http://ibic.github.io/neuropointillist/usage.html by Rebecca Martin and Rosa Li.
+Adapted from http://ibic.github.io/neuropointillist/ and http://ibic.github.io/neuropointillist/usage.html
 
-In this tutorial, we will use the provided `example.rawfmri` dataset to breakdown the mixed model script, fmrimodel.R, called in neuropointillist. 
+In this tutorial, we will use the provided `example.rawfmri` dataset to breakdown the mixed model script, fmrimodel.R, called in neuropointillist.
 
 While the neuropointillist code is mostly in R, you will interact with its functions through the Terminal using Bash.
 
@@ -113,3 +113,6 @@ names(retvals) <- c("tstat-High", "tstat-Low", "tstat-High.gt.Low", "p-High.gt.L
 ```
 
 Please note that there is currently a bug in which Neuropointillist throws an error if only one output value is stored. Check the [github issue](https://github.com/IBIC/neuropointillist/issues/4) for the latest on this bug. For now, a simple workaround is to ask for the same output twice, or to ask for more than one output to be returned.  
+
+### Additional troubleshooting
+See **Notes for troubleshooting** in 04_testretest_opendata_tutorial for notes on how to create a small slice of brain mask to test your model on a smaller number of voxels, rather than your full brain mask.
