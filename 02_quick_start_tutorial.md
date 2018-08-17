@@ -1,8 +1,8 @@
-## Neuropointillist quick start tutorial
+## Neuropointillist quick start tutorial (for macs)
 
 Adapted from http://ibic.github.io/neuropointillist/ and http://ibic.github.io/neuropointillist/usage.html
 
-In this tutorial, we will use the provided example.rawfmri dataset and files to run neuropointillist.
+In this tutorial, we will use the provided example.rawfmri dataset and files to run neuropointillist. This is a simulated fMRI dataset, and this tutorial is primarily designed to get check that neuropointillist will run on your machine and to familiarize you with its basic functions.  
 
 While the neuropointillist code is mostly in R, you will interact with its functions through the Terminal using bash.
 
@@ -16,28 +16,30 @@ Note that this should be the path to the main neuropointillist folder, which wil
 
 If you are already in the folder containing the neuropointillist repository (in the above example, you would be in ~/Desktop), you can run the following to set up your path:
 
-`export PATH=$PATH:`pwd`/neuropointillist`
+```
+export PATH=$PATH:`pwd`/neuropointillist
+```
 
 If you want to permanently add neuropointillist to your path so that you don't have to do the above step every time you open a new Terminal, you can add the neuropointillist path to your ~/.bashrc or ~/.bash_profile (make sure you use the full path for this, NOT the pwd trick!)
 
-### npoint function
+### Preparing data for modeling using npoint
 The function npoint prepares the fMRI data for modeling.
 
 Below is the command line syntax to run npoint:
 
 npoint --set1 listoffiles1.txt --setlabels1 file1.csv --set2 listoffiles2.txt --setlabels2 file2.csv --covariates covariatefile.csv --mask mask.nii.gz --model code.R [ -p N | --sgeN N] --output output --debugfile outputfile
 
-Let's go through what each input means. If you want to skip this for now and just run the tutorial, skip ahead to **Using readargs.R with npoint function**.
+Let's go through what each input means. If you want to skip this for now and just run the tutorial, skip ahead to [**Using readargs.R with npoint function**](#using-readargs.r-with-npoint-function).
 
 * --set1 (through up to set5)
     * corresponds to paths/filenames for your input niftis
-    * for longitudinal data, each set can correspond to a time point (e.g. set1 is timepoint 1, set2 is timepoint 2), but you don't have to do this. You can also put everyone in a single set with timepoint as a covariate.
-    * If you have multiple sets, they do not have to have the same set of participants (i.e. missing data is okay if your model supports that)
+    * for longitudinal data, each set can correspond to a time point (e.g. set1 is timepoint 1, set2 is timepoint 2). Alternatively, you can also put everyone in a single set with timepoint as a covariate.
+    * if you have multiple sets, they do not have to have the same set of participants (i.e. missing data is okay if your model supports that)
     * if you need more than five input sets, you can have everyone in one set with corresponding covariates (e.g. include timepoint as a covariate)
 
 
 * --setlabels1 (through up to setlabels5)
-    * csv files with labels for the niftis in your set
+    * csv files with labels for each nifti in your set
     * the number of setlabels files must match the number of set files
     * if the MRI data files in each set are 3D, the list of files in the set should have exactly the same number of entries as the corresponding setlabels file. This normally includes
         * participant ID
@@ -49,7 +51,7 @@ Let's go through what each input means. If you want to skip this for now and jus
         * elements of your design matrix (regressors of interest)
     * the data in setlabels must be in the same order as the data in the set files
     * the headers of the setlabels files must be consistent across sets and consistent with headers in the covariate file (below; if specified)
-    * Note that in the quick start tutorial, High and Low are two contrast regressors (1 or 0) convolved with an HRF
+    * Note that in the quick start tutorial, High and Low are two contrast regressors (1 or 0) convolved with a hemodynamic response function. See [fmriInR](https://github.com/madhyastha/fmriInR) for how to generate such convolved values.
 
     Below is an example of what your fMRI setlabels file could look like, where ... represents TRs not shown:
 
@@ -68,7 +70,7 @@ Let's go through what each input means. If you want to skip this for now and jus
 * --covariates
     * a csv file that associates participant IDs with any number of covariates (e.g. age, IQ, etc.)
     * all of the information in covariates can, instead, be specified in setlabels; the covariates tag is a convenience option
-    * if a covariate file is specified, it will be merged with the content of the setlabels files based on the header fields that are common to both. An error will occur if there are no common header fields.
+    * if a covariate file is specified, it will be merged with the content of the setlabels files based on the header fields that are common to both. An error will occur if there are no common header fields. Be careful that your spelling/use of upper/lower case matches!
 
     Below is an example of a covariates file that would work with the above example setlabels file.
 
@@ -87,30 +89,30 @@ Let's go through what each input means. If you want to skip this for now and jus
 
 
 * --model
-    * an R file that specifies the R template code to run your model and return results
+    * an R file that specifies the R template code to run your model and return results (see 03_making_your_model_script)
     * can also include any initialization code (e.g. included libraries)
-    * must define the function processVoxel(v), which is described further down
+    * must define the function processVoxel(v), which is described in 03_making_your_model_script.
 
 
 * -p N
     * specifies that multicore parallelism will be implemented using N processors.
-    * A warning is given if the number of processors specified exceeds the number of cores. See SECTION on running a model using multicore parallelism.
+    * A warning is given if the number of processors specified exceeds the number of cores. See ["General considerations for running in parallel"](ibic.github.io/neuropointillist/usage.html) for more on running a model using multicore parallelism.
 
 
 * --sgeN N
-    * specifies to read the data and divide it into N jobs that can be submitted to the SGE (using a runme.sge script that npoint generates) or divided among machines by hand and run using GNU make.
-    * if SGE parallelism is used, assumes that the directory that the program is called from is read/writeable from all cluster nodes. See SECTION on running a model using SGE parallelism.
+    * specifies to divide the data into N jobs that can be submitted to the SGE (using a runme.sge script that npoint generates) or divided among machines by hand and run using GNU make.
+    * if SGE parallelism is used, assumes that the directory that the program is called from is read/writeable from all cluster nodes. See ["Running a model using SGE parallelism"](ibic.github.io/neuropointillist/usage.html) for more information.
 
 
 * --output outputprefix
     * specify the prefix that is prepended to output files to facilitate organization
-    * e.g. using --output model-ageXtime/model1 will organize all output files and scripts to a subdirectory called model-ageXtime, and it will prepend model1 to your output files
+    * e.g. using --output model-ageXtime/model1_ will organize all output files and scripts to a subdirectory called model-ageXtime, and it will prepend model1_ to your output files
     * the model and calling arguments will be copied with this output prefix so that you have a record of what you ran
 
 
 * --debug debugfile
     * writes out external representations of the design matrix, the fMRI data, and a function called imagecoordtovertex, which maps three-dimensional image coordinates (e.g. from fslview) into a vertex number, to the file debugfile.R. T
-    * useful for development and testing of your model, or troubleshooting problems with the setfiles or covariate files. See the Vignette for instructions for how to use the debugfile.
+    * useful for development and testing of your model, or troubleshooting problems with the setfiles or covariate files. See 03_making_your_model_script for instructions for how to use the debugfile.
 
 ### Using readargs.R with npoint function
 
@@ -148,7 +150,7 @@ Enter this folder and check its contents.
 
 If you used -p N or --sge N, the npoint function will split your brain mask into N chunks so that each processor can run its own chunk of brain in parallel. For example, if you set N to 2, your brain would be divided in half so that each half can be processed separately in parallel.
 
-Because we used --output sgedata/sim. for the quick start tutorial, your chunks will be named sim.0001, sim.0002, up to the N you specified for parallelizing the analysis.
+Because we used --output sgedata/sim. for the quick start tutorial, your chunks will be named sim.0001, sim.0002, up to the N you specified for parallelizing the analysis (in the quick start tutorial, N is 10).
 * sim.####.nii.gz files are the "chunks" of brain mask, with 1s for that chunk of brain and 0s for the rest of the space.
 * sim.####.rds files are giant r matrixes with voxel data for all subs for the corresponding chunk of brain.
 
@@ -165,10 +167,40 @@ You may have to first change the permissions for the runme files. The below exam
 chmod +x ./runme.local
 ./runme.local
 ```
-Once npoint is finally done running (this may take multiple hours?), your sgedata folder should have new model output niftis named
+Once runme.local is finally done running (this make take several hours depending on your processing speed; see [Even faster quick start](#even-faster-quick-start) for a simpler model to speed up the tutorial), your sgedata folder should have new model output niftis named
 * sim.p-High.gt.Low.nii.gz
 * sim.tstat-High.gt.Low.nii.gz
 * sim.tstat-High.nii.gz
 * sim.tstat-Low.nii.gz
+
+
+If the above files are missing, but you do have files that look like this:
+* sim.0001p-High.gt.Low.nii.gz
+* sim.0002p-High.gt.Low.nii.gz
+* sim.0003p-High.gt.Low.nii.gz
+
+and so on, it means that your models were run in the separate brain masks, but the call to merge them together was not successfully executed. Don't worry! You can execute this call manually using npointmerge.
+
+npointmerge is called with the below syntax:
+
+`npointmerge <output_filename> <input_files>`
+
+For the quick start tutorial, the commands would be:
+
+```
+npointmerge sim.p-High.gt.Low.nii.gz sim.*p-High.gt.Low.nii.gz
+npointmerge sim.tstat-High.gt.Low.nii.gz sim.*tstat-High.gt.Low.nii.gz
+npointmerge sim.tstat-High.nii.gz sim.*tstat-High.nii.gz
+npointmerge sim.tstat-Low.nii.gz sim.*tstat-Low.nii.gz
+```
+
+### Even faster quick start
+
+To speed up the processing speed (to ~5 min) just to test that Neuropointillist is working, you can simplify the model by removing the autocorrelation parameter in fmrimodel.R:
+
+Replace the e line with
+```
+e <- try(mod <- lme(Y ~ High+Low, random=~1|subject, method=c("ML"), na.action=na.omit, control=lmeControl(returnObject=TRUE,singular.ok=TRUE)))
+```
 
 Congratulations! You have completed the quick start tutorial!

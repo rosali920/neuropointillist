@@ -6,13 +6,14 @@ Instructions adapted from: http://ibic.github.io/neuropointillist/installation.h
 #### Needed programs:
 * R
 * Python 2.7 or later
+* fsl OR nibabel python package
 
 Note that you only need to install the Python and R packages once on your local machine; after they have been installed, neuropointillist will be able to load them as needed:
 
 #### Needed Python packages
 * argparse (for R's argparse package)
 * json (for R's argparse package)
-* nibabel
+* nibabel (if you do not have FSL installed)
 
 The simplest way to install python packages is through pip ([instructions for download here](https://pip.pypa.io/en/stable/); note that pip installs automatically with [Anaconda/miniconda](https://conda.io/docs/user-guide/install/index.html)):
 
@@ -29,7 +30,7 @@ pip install nibabel
 * nlme (if you're using the tutorial's model)
 * neuropointillist
 
-The simplest way to install the first 4 R packages is to open R and run the following commands:
+If you don't have the first 4 R packages in the list, the neuropointillist code will try to install these packages for you when it runs. Just to be safe, you can install them manually yourself. The simplest way to install the first 4 R packages is to open R and run the following commands:
 
 ```
 install.packages("argparse")
@@ -39,11 +40,13 @@ install.packages("http://ascopa.server4you.net/ubuntu/ubuntu/pool/universe/r/r-c
 install.packages("nlme")
 ```
 
-To install the neuropointillist package, you must first clone the neuropointillist repository to your local machine. To do this in Terminal, navigate to the folder you want to put the repository in and run the following:
+To install the neuropointillist package, you must first clone the neuropointillist repository to your local machine. You can do this manually from the [Neuropointillist GitHub repository](https://github.com/IBIC/neuropointillist) by clicking the green "Clone or download" button.  
+
+Alternatively, you can use Terminal and [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git). Navigate to the folder you want to put the repository in and run the following:
 
 `git clone https://github.com/IBIC/neuropointillist.git`
 
-Then in Terminal, cd into the neuropointillist folder you just cloned. There should be yet another neuropointillist folder in this folder. Make sure you're in the first neuropointillist folder but not the second. In other words, if the folder structure looks like ~/Desktop/neuropointillist/neuropointillist, you should be in ~/Desktop/neuropointillist
+Once you have the repository on your local machine, in Terminal, cd into the neuropointillist folder you just cloned. There should be yet another neuropointillist folder in this folder. Make sure you're in the first neuropointillist folder but not the second. In other words, if the folder structure looks like ~/Desktop/neuropointillist/neuropointillist, you should be in ~/Desktop/neuropointillist
 
 Open R and run the following to install the neuropointillist package:
 

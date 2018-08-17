@@ -1,8 +1,8 @@
 ## Tutorial for running Neuropointillist on preprocessed fMRI data
 
-Note that this tutorial builds off information conveyed in the Quick Start Tutorial.
+Note that this tutorial builds off information conveyed in 02_quick_start_tutorial.md.
 
-You should be in the folder neuropointillist/example.testretest.
+You should be in the folder neuropointillist/example.testretest and already have the main neuropointillist folder in your path.s
 
 ### Overview of the dataset
 
@@ -40,9 +40,13 @@ The 8 ..._brainmask.nii.gz files are the individual runs' brain mask files. Plac
 
 ### Create a shared mask
 
-Even though participants' brains have been coregistered to standard space, their masks are slightly different. We want a common mask that will have voxel data for all subs.
+Even though participants' brains have been coregistered to standard space, their masks are slightly different. We will create a common mask that will have voxel data for all subs using nb_createmask.
 
-Run nb_createmasks.py to create this common mask - more details after check w/ Emily's version
+nb_createmask takes the folder containing your masks (and only your masks) as input. From the neuropointillist/example.testretest folder:
+
+`nb_createmask "./indiv_masks/"`
+
+This will create a common mask called "group_min_mask" in your example.testretest folder.
 
 ### Inspect the setfilenames files
 
@@ -54,17 +58,17 @@ setlabels1.csv contains detailed information for every TR for every run listed i
 
 Compare these csv files to the original timing files (task-overtwordrepetition_events.csv). The task used 5s TRs. Note how we have converted the task onset/offset times into TR numbers so that each row of the csv file denotes a TR, and whether the participant is engaging in the task or waiting out an ITI at that TR.
 
-See QUICKSTART TUTORIAL for more information about these files.
+See 02_quick_start_tutorial for more information about these files.
 
 ### Inspect the fmrimodel.R file
 
-This file contains the model that you want to run on each voxel, and returns your desired statistical values. See 03_TUTORIAL_ON_MODEL for more information.
+This file contains the model that you want to run on each voxel, and returns your desired statistical values. See 03_making_your_model_script for more information.
 
 Our example model
 
-` mod <- lme(Y ~ task, random=~1|sub, method=c("ML"), na.action=na.omit, corr=corAR1(form=~1|sub), control=lmeControl(returnObject=TRUE,singular.ok=TRUE))`
+`mod <- lme(Y ~ task, random=~1|sub, method=c("ML"), na.action=na.omit)`
 
-is a simple mixed model that captures the degree to which the presence of "task" predicts voxel activity, while accounting for the random effect of participant identify. We will save two brain maps, one of the t-stats associated with the task regressor, and one of the p-values associated with the task regressor.
+is a simple mixed model that captures the degree to which the presence of "task" predicts voxel activity, while accounting for the random effect of participant identify. The fmrimodel.R will save two brain maps, one of the t-stats associated with the task regressor, and one of the p-values associated with the task regressor.
 
 ### Inspect the readargs.R file
 
@@ -72,7 +76,7 @@ The readargs.R file contains the variables that are passed to npoint. Inspect th
 
 ### Run the fmrimodel
 
-From the example.testretest folder,
+From the example.testretest folder, enter
 
 `npoint`
 
@@ -94,11 +98,22 @@ chmod +x ./runme.local
 ### Expected output
 
 You should have the following output when the code is done running.
-* model10001p-task.nii.gz
-* model10001tstat-task.nii.gz
+* model1_p-task.nii.gz
+* model1_t-task.nii.gz
 
 **Congratulations! You have completed the TestRetest tutorial!**
 
 ### Notes for troubleshooting
 
-For debugging convenience, the example.testrest folder also includes a test_mask.nii.gz of just 745 voxels (one slice of brain). This will let you run your models quickly through the workflow to help troubleshoot. The code to make this mask is also included (nb_createTESTmask.py); please note that it also includes numpy as a dependency.
+If your files did not properly merge (e.g. you see things like model1_0001p-task.nii.gz, model1_0002p-task.nii.gz), you can run npointmerge manually to pull them together:
+
+```
+npointmerge model1_p-task.nii.gz model1*p-task.nii.gz
+npointmerge model1_t-task.nii.gz model1*t-task.nii.gz
+```
+
+For debugging convenience, the example.testrest folder also includes a test_mask.nii.gz of just 745 voxels (one slice of brain). This will let you run your models quickly through the workflow to help troubleshoot.
+
+The code to make this mask is also included as nb_create_test_mask, which is executed like  nb_createmask. Note that it also includes numpy as a dependency. You may have to change the number 30 in the below to a different number that fits your mask size.
+
+`new_mask[:, 30, :] = sum_data[:, 30, :]`
